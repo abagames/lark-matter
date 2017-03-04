@@ -33,14 +33,20 @@ function initRender() {
 
 function createBody() {
   const body: Matter.Body = this;
-  // TODO: body.position should be a center of patterns
-  const bMinX = (<any>body.bounds).min.x;
-  const bMinY = (<any>body.bounds).min.y;
-  const bMaxX = (<any>body.bounds).max.x;
-  const bMaxY = (<any>body.bounds).max.y;
+  let bMinX = (<any>body.bounds).min.x;
+  let bMinY = (<any>body.bounds).min.y;
+  let bMaxX = (<any>body.bounds).max.x;
+  let bMaxY = (<any>body.bounds).max.y;
+  let w = Math.max(body.position.x - bMinX, bMaxX - body.position.x);
+  let h = Math.max(body.position.y - bMinY, bMaxY - body.position.y);
+  bMinX = body.position.x - w;
+  bMaxX = body.position.x + w;
+  bMinY = body.position.y - h;
+  bMaxY = body.position.y + h;
   const tw = Math.ceil((bMaxX - bMinX) * options.scale) + 1;
   const th = Math.ceil((bMaxY - bMinY) * options.scale) + 1;
-  const lines: { min: number, max: number }[] = _.times(th, () => null);
+  let lines: { min: number, max: number }[] = _.times(th, () => null);
+  const patterns: string[][] = _.times(th, () => _.times(tw, () => ' '));
   for (let k = body.parts.length > 1 ? 1 : 0; k < body.parts.length; k++) {
     const verticies = body.parts[k].vertices;
     let fv: Matter.Vector;
@@ -48,6 +54,8 @@ function createBody() {
     _.forEach(verticies, (vert: any) => {
       if (vert.isInternal) {
         pv = null;
+        fillLines(patterns, lines);
+        lines = _.times(th, () => null);
         return;
       }
       const v = Matter.Vector.create
@@ -63,15 +71,8 @@ function createBody() {
       drawLine(lines, tw, th, pv, fv);
     }
   }
-  const patternStrings = _.map(lines, (l, y) => {
-    if (l == null) {
-      return _.times(tw, () => ' ').join('');
-    }
-    const min = Math.floor(l.min);
-    const max = Math.floor(l.max);
-    return _.times(tw, i => (i >= min && i <= max) ? '*' : ' ').join('');
-  });
-  (<any>body).pixels = pag.generate(patternStrings);
+  fillLines(patterns, lines);
+  (<any>body).pixels = pag.generate(_.map(patterns, p => p.join('')));
 }
 
 function drawLine
@@ -110,6 +111,17 @@ function drawLine
   });
 }
 
+function fillLines(patterns: string[][], lines: { min: number, max: number }[]) {
+  _.forEach(lines, (l, y) => {
+    if (l == null) {
+      return;
+    }
+    for (let x = Math.floor(l.min); x <= Math.floor(l.max); x++) {
+      patterns[y][x] = '*';
+    }
+  });
+}
+
 function runRender(render: Matter.Render) {
   Render.stop(render);
   canvas = document.createElement('canvas');
@@ -131,7 +143,7 @@ function runRender(render: Matter.Render) {
 
 function renderLm(render: Matter.Render) {
   requestAnimationFrame(() => { renderLm(render); });
-  context.fillStyle = '#ccc';
+  context.fillStyle = '#fff';
   context.fillRect(0, 0, canvas.width, canvas.height);
   const bodies = Composite.allBodies((<any>render).engine.world);
   _.forEach(bodies, body => {
