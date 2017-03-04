@@ -24,8 +24,11 @@ function initRender() {
   render.element.removeChild(render.canvas);
   pag.setDefaultOptions({
     isLimitingColors: true,
-    rotationNum: options.rotationNum
+    rotationNum: options.rotationNum,
+    colorLighting: 0.5,
+    colorNoise: 0.01
   });
+  pag.setSeed(80);
 }
 
 function createBody() {
@@ -112,8 +115,15 @@ function runRender(render: Matter.Render) {
   canvas = document.createElement('canvas');
   canvas.width = 128;
   canvas.height = 128;
-  canvas.style.width = '512px';
-  canvas.style.height = '512px';
+  canvas.style.cssText = `
+  width: 512px;
+  height: 512px;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -o-crisp-edges;
+  image-rendering: pixelated;
+  background: black;
+  `;
   context = canvas.getContext('2d');
   document.body.appendChild(canvas);
   renderLm(render);
@@ -121,7 +131,7 @@ function runRender(render: Matter.Render) {
 
 function renderLm(render: Matter.Render) {
   requestAnimationFrame(() => { renderLm(render); });
-  context.fillStyle = '#000';
+  context.fillStyle = '#ccc';
   context.fillRect(0, 0, canvas.width, canvas.height);
   const bodies = Composite.allBodies((<any>render).engine.world);
   _.forEach(bodies, body => {
@@ -163,7 +173,7 @@ function wrap(v: number, low: number, high: number) {
 }
 
 function start() {
-  //*
+  /*
   const engine = Engine.create();
   const render = Render.create({
     element: document.body,
@@ -223,5 +233,5 @@ function start() {
     pointA: { x: 300, y: 100 },
     bodyB: ball
   }));
-  */
+  //*/
 }
