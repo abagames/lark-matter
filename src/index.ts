@@ -1,5 +1,8 @@
 import * as _ from 'lodash';
-import { Engine, Render, World, Bodies, Events, Composite, Composites, Constraint } from 'matter-js';
+import {
+  Engine, Render, Runner, World, Bodies, Body, Events,
+  Composite, Composites, Constraint
+} from 'matter-js';
 import * as Matter from 'matter-js';
 import * as pag from 'pag';
 import * as ppe from 'ppe';
@@ -98,7 +101,7 @@ function createBody() {
   }
   fillLines(patterns, lines);
   (<any>body).pixels = pag.generate(_.map(patterns, p => p.join('')));
-  (<any>body).ppeTypeId = `${(tw + th) % 10 < 7 ? 'm' : 's'}_${tw}_${th}`;
+  (<any>body).ppeTypeId = `m_${tw}_${th}`;
   const seTypes = ['h', 'l', 's'];
   (<any>body).sssTypeId = `${seTypes[(tw + th) % 3]}_${tw}_${th}`;
 }
@@ -181,12 +184,15 @@ function initEngine() {
       _.forEach(p.activeContacts, ac => {
         const b = ac.vertex.body;
         const v = b.velocity;
-        const ratio = (<any>p).collision.depth * Matter.Vector.magnitude(v) * 0.1;
+        let ratio = (<any>p).collision.depth * Matter.Vector.magnitude(v) * 0.1;
+        if (ratio > 2) {
+          ratio = 2;
+        }
         if (ratio > 0.3) {
           ppe.emit(b.ppeTypeId,
             ac.vertex.x * options.scale, ac.vertex.y * options.scale,
             Math.atan2(-v.y, -v.x),
-            { sizeScale: ratio, countScale: ratio });
+            { sizeScale: ratio, countScale: ratio, speed: 0.7 });
           sss.play(b.sssTypeId, 2, null, ratio > 1 ? 1 : ratio);
         }
       });
@@ -209,65 +215,46 @@ function wrap(v: number, low: number, high: number) {
 }
 
 function start() {
-  /*
-  const engine = Engine.create();
-  const render = Render.create({
-    element: document.body,
-    engine: engine
-  });
-  var boxA = Bodies.rectangle(400, 200, 50, 100);
-  //var boxB = Bodies.rectangle(450, 50, 120, 30);
-  var boxB = Bodies.circle(450, 50, 60);
-  var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-  World.add(engine.world, [boxA, boxB, ground]);
-  Engine.run(engine);
-  Render.run(render);
-  /*/
-  // create engine
   var engine = Engine.create(),
     world = engine.world;
-
-  // create renderer
   var render = Render.create({
     element: document.body,
     engine: engine,
     options: {
       width: Math.min(document.documentElement.clientWidth, 800),
       height: Math.min(document.documentElement.clientHeight, 600),
-      //showAngleIndicator: true
     }
   });
-
   Render.run(render);
-
-  // create runner
-  //var runner = Runner.create();
-  //Runner.run(runner, engine);
-  Engine.run(engine);
-
-  // add bodies
+  var runner = (<any>Runner).create();
+  Runner.run(runner, engine);
+  /*var boxA = Bodies.rectangle(400, 200, 50, 100);
+  //var boxB = Bodies.rectangle(450, 50, 120, 30);
+  var boxB = Bodies.circle(450, 50, 60);
+  var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+  World.add(engine.world, [boxA, boxB, ground]);*/
+  /*var cradle = (<any>Composites).newtonsCradle(280, 100, 5, 30, 200);
+  World.add(world, cradle);
+  Body.translate(cradle.bodies[0], { x: -180, y: -100 });
+  cradle = (<any>Composites).newtonsCradle(280, 380, 7, 20, 140);
+  World.add(world, cradle);
+  Body.translate(cradle.bodies[0], { x: -140, y: -100 });*/
   var rows = 10,
     yy = 600 - 21 - 40 * rows;
-
   var stack = Composites.stack(400, yy, 5, rows, 0, 0, function (x, y) {
     return Bodies.rectangle(x, y, 40, 40);
   });
-
   (<any>World.add)(world, [
     stack,
-    // walls
     Bodies.rectangle(400, 0, 800, 50, { isStatic: true }),
     Bodies.rectangle(400, 600, 800, 50, { isStatic: true }),
     Bodies.rectangle(800, 300, 50, 600, { isStatic: true }),
     Bodies.rectangle(0, 300, 50, 600, { isStatic: true })
   ]);
-
   var ball = Bodies.circle(100, 400, 50, { density: 0.04, frictionAir: 0.005 });
-
   World.add(world, ball);
   World.add(world, Constraint.create({
     pointA: { x: 300, y: 100 },
     bodyB: ball
   }));
-  //*/
 }
