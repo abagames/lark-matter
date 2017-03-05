@@ -100,10 +100,55 @@ function createBody() {
     }
   }
   fillLines(patterns, lines);
-  (<any>body).pixels = pag.generate(_.map(patterns, p => p.join('')));
+  let px = 0;
+  let py = 0;
+  let pvx = 0;
+  let pvy = 0;
+  let pw = tw;
+  let ph = th;
+  let pc: number;
+  if (tw > th) {
+    pc = Math.floor(tw / th / 2);
+    if (pc < 1) {
+      pc = 1;
+    }
+    pw = Math.ceil(tw / pc);
+    pvx = tw / pc;
+  } else {
+    pc = Math.floor(th / tw / 2);
+    if (pc < 1) {
+      pc = 1;
+    }
+    ph = Math.ceil(th / pc);
+    pvy = th / pc;
+  }
+  (<any>body).pixels = _.times(pc, () => {
+    const pixel = {
+      pattern: pag.generate
+        (getPatternStrings(patterns, Math.floor(px), Math.floor(py), pw, ph)),
+      x: px + pw / 2 - tw / 2,
+      y: py + ph / 2 - th / 2
+    };
+    px += pvx;
+    py += pvy;
+    return pixel;
+  });
   (<any>body).ppeTypeId = `m_${tw}_${th}`;
   const seTypes = ['h', 'l', 's'];
   (<any>body).sssTypeId = `${seTypes[(tw + th) % 3]}_${tw}_${th}`;
+}
+
+function getPatternStrings
+  (patterns: string[][], px: number, py: number, w: number, h: number) {
+  let strs = [];
+  for (let y = py; y < py + h; y++) {
+    let str = '';
+    for (let x = px; x < px + w; x++) {
+      str += patterns[y][x];
+    }
+    strs.push(str);
+  }
+  return strs;
 }
 
 function drawLine
@@ -169,11 +214,19 @@ function renderLm(render: Matter.Render) {
     if (!body.render.visible) {
       return;
     }
+    const angle = body.angle;
     const ri = wrap(
-      Math.round(body.angle * options.rotationNum / (Math.PI * 2)),
+      Math.round(angle * options.rotationNum / (Math.PI * 2)),
       0, options.rotationNum);
-    pag.draw(context, (<any>body).pixels,
-      body.position.x * options.scale, body.position.y * options.scale, ri);
+    const x = body.position.x * options.scale;
+    const y = body.position.y * options.scale;
+    let o = Matter.Vector.create();
+    _.forEach((<any>body).pixels, p => {
+      o.x = p.x;
+      o.y = p.y;
+      o = Matter.Vector.rotate(o, angle);
+      pag.draw(context, p.pattern, x + o.x, y + o.y, ri);
+    });
   });
 }
 
