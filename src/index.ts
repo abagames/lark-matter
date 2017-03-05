@@ -3,6 +3,7 @@ import { Engine, Render, World, Bodies, Events, Composite, Composites, Constrain
 import * as Matter from 'matter-js';
 import * as pag from 'pag';
 import * as ppe from 'ppe';
+import * as sss from 'sss';
 
 window.onload = init;
 let canvas: HTMLCanvasElement;
@@ -46,9 +47,13 @@ function initRender() {
   ppe.setOptions({
     canvas: canvas
   });
+  sss.init();
+  sss.setQuantize(0.25);
   const seed = Math.random() * 9999999;
   pag.setSeed(seed);
   ppe.setSeed(seed);
+  sss.setSeed(seed);
+  sss.playBgm('0', 0.25, [sss.Preset.Laser, sss.Preset.Hit], 4, 0.5);
 }
 
 function createBody() {
@@ -93,7 +98,9 @@ function createBody() {
   }
   fillLines(patterns, lines);
   (<any>body).pixels = pag.generate(_.map(patterns, p => p.join('')));
-  (<any>body).typeId = `${tw}_${th}`;
+  (<any>body).ppeTypeId = `${(tw + th) % 10 < 7 ? 'm' : 's'}_${tw}_${th}`;
+  const seTypes = ['h', 'l', 's'];
+  (<any>body).sssTypeId = `${seTypes[(tw + th) % 3]}_${tw}_${th}`;
 }
 
 function drawLine
@@ -153,6 +160,7 @@ function renderLm(render: Matter.Render) {
   context.fillStyle = '#fff';
   context.fillRect(0, 0, canvas.width, canvas.height);
   ppe.update();
+  sss.update();
   const bodies = Composite.allBodies((<any>render).engine.world);
   _.forEach(bodies, body => {
     if (!body.render.visible) {
@@ -171,13 +179,15 @@ function initEngine() {
   Events.on(engine, 'collisionStart', e => {
     _.forEach(e.pairs, p => {
       _.forEach(p.activeContacts, ac => {
-        const v = ac.vertex.body.velocity;
+        const b = ac.vertex.body;
+        const v = b.velocity;
         const ratio = (<any>p).collision.depth * Matter.Vector.magnitude(v) * 0.1;
         if (ratio > 0.3) {
-          ppe.emit(`m_${ac.vertex.body.typeId}`,
+          ppe.emit(b.ppeTypeId,
             ac.vertex.x * options.scale, ac.vertex.y * options.scale,
             Math.atan2(-v.y, -v.x),
             { sizeScale: ratio, countScale: ratio });
+          sss.play(b.sssTypeId, 2, null, ratio > 1 ? 1 : ratio);
         }
       });
     });
