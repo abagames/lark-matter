@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import { Engine, Render, World, Bodies, Events, Composite, Composites, Constraint } from 'matter-js';
 import * as Matter from 'matter-js';
 import * as pag from 'pag';
+import * as ppe from 'ppe';
 
 window.onload = init;
 let canvas: HTMLCanvasElement;
@@ -22,13 +23,32 @@ function init() {
 function initRender() {
   const render: Matter.Render = this;
   render.element.removeChild(render.canvas);
+  canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  canvas.style.cssText = `
+  width: 512px;
+  height: 512px;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -o-crisp-edges;
+  image-rendering: pixelated;
+  background: white;
+  `;
+  context = canvas.getContext('2d');
+  document.body.appendChild(canvas);
   pag.setDefaultOptions({
     isLimitingColors: true,
     rotationNum: options.rotationNum,
     colorLighting: 0.5,
     colorNoise: 0.01
   });
-  pag.setSeed(80);
+  ppe.setOptions({
+    canvas: canvas
+  });
+  const seed = Math.random() * 9999999;
+  pag.setSeed(seed);
+  ppe.setSeed(seed);
 }
 
 function createBody() {
@@ -73,6 +93,7 @@ function createBody() {
   }
   fillLines(patterns, lines);
   (<any>body).pixels = pag.generate(_.map(patterns, p => p.join('')));
+  (<any>body).typeId = `${tw}_${th}`;
 }
 
 function drawLine
@@ -124,20 +145,6 @@ function fillLines(patterns: string[][], lines: { min: number, max: number }[]) 
 
 function runRender(render: Matter.Render) {
   Render.stop(render);
-  canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  canvas.style.cssText = `
-  width: 512px;
-  height: 512px;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: -o-crisp-edges;
-  image-rendering: pixelated;
-  background: black;
-  `;
-  context = canvas.getContext('2d');
-  document.body.appendChild(canvas);
   renderLm(render);
 }
 
@@ -145,6 +152,7 @@ function renderLm(render: Matter.Render) {
   requestAnimationFrame(() => { renderLm(render); });
   context.fillStyle = '#fff';
   context.fillRect(0, 0, canvas.width, canvas.height);
+  ppe.update();
   const bodies = Composite.allBodies((<any>render).engine.world);
   _.forEach(bodies, body => {
     if (!body.render.visible) {
@@ -162,9 +170,15 @@ function initEngine() {
   const engine: Engine = this;
   Events.on(engine, 'collisionStart', e => {
     _.forEach(e.pairs, p => {
-      //console.log((<any>p).collision.depth);
       _.forEach(p.activeContacts, ac => {
-        //console.log(ac.vertex);
+        const v = ac.vertex.body.velocity;
+        const ratio = (<any>p).collision.depth * Matter.Vector.magnitude(v) * 0.1;
+        if (ratio > 0.3) {
+          ppe.emit(`m_${ac.vertex.body.typeId}`,
+            ac.vertex.x * options.scale, ac.vertex.y * options.scale,
+            Math.atan2(-v.y, -v.x),
+            { sizeScale: ratio, countScale: ratio });
+        }
       });
     });
   });
