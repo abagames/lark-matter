@@ -48,15 +48,17 @@ function initRender() {
     colorNoise: 0.01
   });
   ppe.setOptions({
-    canvas: canvas
+    canvas: canvas,
+    isLimitingColors: true
   });
   sss.init();
+  sss.setVolume(0.2)
   sss.setQuantize(0.25);
   const seed = Math.random() * 9999999;
   pag.setSeed(seed);
   ppe.setSeed(seed);
   sss.setSeed(seed);
-  sss.playBgm('0', 0.25, [sss.Preset.Laser, sss.Preset.Hit], 4, 0.5);
+  sss.playBgm('0', 0.25, [sss.Preset.Laser, sss.Preset.Hit], 8, 0.3);
 }
 
 function createBody() {
@@ -245,7 +247,7 @@ function initEngine() {
           ppe.emit(b.ppeTypeId,
             ac.vertex.x * options.scale, ac.vertex.y * options.scale,
             Math.atan2(-v.y, -v.x),
-            { sizeScale: ratio, countScale: ratio, speed: 0.7 });
+            { countScale: ratio, speed: 0.7 * ratio });
           sss.play(b.sssTypeId, 2, null, ratio > 1 ? 1 : ratio);
         }
       });
