@@ -1,8 +1,14 @@
 module.exports = {
-  entry: require('glob').sync('./src/**/*.ts'),
+  entry: {
+    'lark-matter': ['./src/lark-matter/index.ts'],
+    wrecking: ['./src/wrecking/index.ts', './src/lark-matter/index.ts'],
+    newton: ['./src/newton/index.ts', './src/lark-matter/index.ts']
+  },
   output: {
     path: __dirname + '/docs',
-    filename: 'bundle.js',
+    filename: '[name]/index.js',
+    library: ['[name]'],
+    libraryTarget: 'umd'
   },
   resolve: {
     extensions: ['.ts', '.js'],
