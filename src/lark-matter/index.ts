@@ -1,10 +1,8 @@
-import * as _ from 'lodash';
 import * as Matter from 'matter-js';
 import * as pag from 'pag';
 import * as ppe from 'ppe';
 import * as sss from 'sss';
 
-window.onload = init;
 let canvas: HTMLCanvasElement;
 let context: CanvasRenderingContext2D;
 let options = {
@@ -70,17 +68,17 @@ function createBody() {
   bMaxY = body.position.y + h;
   const tw = Math.ceil((bMaxX - bMinX) * options.scale) + 1;
   const th = Math.ceil((bMaxY - bMinY) * options.scale) + 1;
-  let lines: { min: number, max: number }[] = _.times(th, () => null);
-  const patterns: string[][] = _.times(th, () => _.times(tw, () => ' '));
+  let lines: { min: number, max: number }[] = nArray(th, null);
+  const patterns: string[][] = timesArray(th, () => timesArray(tw, () => ' '));
   for (let k = body.parts.length > 1 ? 1 : 0; k < body.parts.length; k++) {
     const verticies = body.parts[k].vertices;
     let fv: Matter.Vector;
     let pv: Matter.Vector;
-    _.forEach(verticies, (vert: any) => {
+    verticies.forEach((vert: any) => {
       if (vert.isInternal) {
         pv = null;
         fillLines(patterns, lines);
-        lines = _.times(th, () => null);
+        lines = nArray(th, null);
         return;
       }
       const v = Matter.Vector.create
@@ -119,7 +117,7 @@ function createBody() {
     ph = Math.ceil(th / pc);
     pvy = th / pc;
   }
-  (<any>body).pixels = _.times(pc, () => {
+  (<any>body).pixels = timesArray(pc, () => {
     const pixel = {
       pattern: pag.generate
         (getPatternStrings(patterns, Math.floor(px), Math.floor(py), pw, ph)),
@@ -164,18 +162,19 @@ function drawLine
     vx = p1.x > p2.x ? -1 : 1;
   }
   let px = p1.x;
-  let py = Math.floor(p1.y);
-  _.times(c, () => {
-    if (px >= 0 && px < pw && py >= 0 && py < ph) {
-      let l = lines[py];
+  let py = p1.y;
+  times(c, () => {
+    const fpy = Math.round(py)
+    if (px >= 0 && px < pw && fpy >= 0 && fpy < ph) {
+      let l = lines[fpy];
       if (l == null) {
-        lines[py] = { min: px, max: px };
+        lines[fpy] = { min: px, max: px };
       } else {
         if (px < l.min) {
-          lines[py].min = px;
+          lines[fpy].min = px;
         }
         if (px > l.max) {
-          lines[py].max = px;
+          lines[fpy].max = px;
         }
       }
     }
@@ -185,7 +184,7 @@ function drawLine
 }
 
 function fillLines(patterns: string[][], lines: { min: number, max: number }[]) {
-  _.forEach(lines, (l, y) => {
+  lines.forEach((l, y) => {
     if (l == null) {
       return;
     }
@@ -207,7 +206,7 @@ function renderLm(render: Matter.Render) {
   ppe.update();
   sss.update();
   const bodies = Matter.Composite.allBodies((<any>render).engine.world);
-  _.forEach(bodies, body => {
+  bodies.forEach(body => {
     if (!body.render.visible) {
       return;
     }
@@ -218,7 +217,7 @@ function renderLm(render: Matter.Render) {
     const x = body.position.x * options.scale;
     const y = body.position.y * options.scale;
     let o = Matter.Vector.create();
-    _.forEach((<any>body).pixels, p => {
+    (<any>body).pixels.forEach(p => {
       o.x = p.x;
       o.y = p.y;
       o = Matter.Vector.rotate(o, angle);
@@ -230,8 +229,8 @@ function renderLm(render: Matter.Render) {
 function initEngine() {
   const engine: Matter.Engine = this;
   Matter.Events.on(engine, 'collisionStart', e => {
-    _.forEach(e.pairs, p => {
-      _.forEach(p.activeContacts, ac => {
+    e.pairs.forEach(p => {
+      p.activeContacts.forEach(ac => {
         const b = ac.vertex.body;
         const v = b.velocity;
         let ratio = (<any>p).collision.depth * Matter.Vector.magnitude(v) * 0.1;
@@ -262,4 +261,26 @@ function wrap(v: number, low: number, high: number) {
     }
     return v;
   }
+}
+
+function nArray(n: number, v: any) {
+  let result = [];
+  for (let i = 0; i < n; i++) {
+    result.push(v);
+  }
+  return result;
+}
+
+function times(n: number, func: Function) {
+  for (let i = 0; i < n; i++) {
+    func();
+  }
+}
+
+function timesArray(n: number, func: Function) {
+  let result = [];
+  for (let i = 0; i < n; i++) {
+    result.push(func());
+  }
+  return result;
 }
