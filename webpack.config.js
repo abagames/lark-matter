@@ -26,5 +26,8 @@ module.exports = {
         loader: 'awesome-typescript-loader'
       }
     ]
+  },
+  externals: {
+    "matter-js": "Matter"
   }
 };
