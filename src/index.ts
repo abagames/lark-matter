@@ -1,8 +1,4 @@
 import * as _ from 'lodash';
-import {
-  Engine, Render, Runner, World, Bodies, Body, Events,
-  Composite, Composites, Constraint
-} from 'matter-js';
 import * as Matter from 'matter-js';
 import * as pag from 'pag';
 import * as ppe from 'ppe';
@@ -201,7 +197,7 @@ function fillLines(patterns: string[][], lines: { min: number, max: number }[]) 
 }
 
 function runRender(render: Matter.Render) {
-  Render.stop(render);
+  Matter.Render.stop(render);
   renderLm(render);
 }
 
@@ -211,7 +207,7 @@ function renderLm(render: Matter.Render) {
   context.fillRect(0, 0, canvas.width, canvas.height);
   ppe.update();
   sss.update();
-  const bodies = Composite.allBodies((<any>render).engine.world);
+  const bodies = Matter.Composite.allBodies((<any>render).engine.world);
   _.forEach(bodies, body => {
     if (!body.render.visible) {
       return;
@@ -233,8 +229,8 @@ function renderLm(render: Matter.Render) {
 }
 
 function initEngine() {
-  const engine: Engine = this;
-  Events.on(engine, 'collisionStart', e => {
+  const engine: Matter.Engine = this;
+  Matter.Events.on(engine, 'collisionStart', e => {
     _.forEach(e.pairs, p => {
       _.forEach(p.activeContacts, ac => {
         const b = ac.vertex.body;
@@ -270,9 +266,9 @@ function wrap(v: number, low: number, high: number) {
 }
 
 function start() {
-  var engine = Engine.create(),
+  var engine = Matter.Engine.create(),
     world = engine.world;
-  var render = Render.create({
+  var render = Matter.Render.create({
     element: document.body,
     engine: engine,
     options: {
@@ -280,35 +276,30 @@ function start() {
       height: Math.min(document.documentElement.clientHeight, 600),
     }
   });
-  Render.run(render);
-  var runner = (<any>Runner).create();
-  Runner.run(runner, engine);
-  /*var boxA = Bodies.rectangle(400, 200, 50, 100);
-  //var boxB = Bodies.rectangle(450, 50, 120, 30);
-  var boxB = Bodies.circle(450, 50, 60);
-  var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-  World.add(engine.world, [boxA, boxB, ground]);*/
-  /*var cradle = (<any>Composites).newtonsCradle(280, 100, 5, 30, 200);
-  World.add(world, cradle);
-  Body.translate(cradle.bodies[0], { x: -180, y: -100 });
-  cradle = (<any>Composites).newtonsCradle(280, 380, 7, 20, 140);
-  World.add(world, cradle);
-  Body.translate(cradle.bodies[0], { x: -140, y: -100 });*/
+  Matter.Render.run(render);
+  var runner = (<any>Matter.Runner).create();
+  Matter.Runner.run(runner, engine);
+  /*var cradle = (<any>Matter.Composites).newtonsCradle(280, 100, 5, 30, 200);
+  Matter.World.add(world, cradle);
+  Matter.Body.translate(cradle.bodies[0], { x: -180, y: -100 });
+  cradle = (<any>Matter.Composites).newtonsCradle(280, 380, 7, 20, 140);
+  Matter.World.add(world, cradle);
+  Matter.Body.translate(cradle.bodies[0], { x: -140, y: -100 });*/
   var rows = 10,
     yy = 600 - 21 - 40 * rows;
-  var stack = Composites.stack(400, yy, 5, rows, 0, 0, function (x, y) {
-    return Bodies.rectangle(x, y, 40, 40);
+  var stack = Matter.Composites.stack(400, yy, 5, rows, 0, 0, function (x, y) {
+    return Matter.Bodies.rectangle(x, y, 40, 40);
   });
-  (<any>World.add)(world, [
+  (<any>Matter.World.add)(world, [
     stack,
-    Bodies.rectangle(400, 0, 800, 50, { isStatic: true }),
-    Bodies.rectangle(400, 600, 800, 50, { isStatic: true }),
-    Bodies.rectangle(800, 300, 50, 600, { isStatic: true }),
-    Bodies.rectangle(0, 300, 50, 600, { isStatic: true })
+    Matter.Bodies.rectangle(400, 0, 800, 50, { isStatic: true }),
+    Matter.Bodies.rectangle(400, 600, 800, 50, { isStatic: true }),
+    Matter.Bodies.rectangle(800, 300, 50, 600, { isStatic: true }),
+    Matter.Bodies.rectangle(0, 300, 50, 600, { isStatic: true })
   ]);
-  var ball = Bodies.circle(100, 400, 50, { density: 0.04, frictionAir: 0.005 });
-  World.add(world, ball);
-  World.add(world, Constraint.create({
+  var ball = Matter.Bodies.circle(100, 400, 50, { density: 0.04, frictionAir: 0.005 });
+  Matter.World.add(world, ball);
+  Matter.World.add(world, Matter.Constraint.create({
     pointA: { x: 300, y: 100 },
     bodyB: ball
   }));
