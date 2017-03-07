@@ -1,7 +1,7 @@
 {
   "name": "lark-matter",
   "version": "1.0.0",
-  "description": "Pixel art style matter.js renderer",
+  "description": "Pixel art style matter.js renderer plugin",
   "author": "ABA",
   "license": "MIT",
   "scripts": {
