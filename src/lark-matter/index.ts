@@ -21,11 +21,11 @@ function initRender() {
   const render: Matter.Render = this;
   render.element.removeChild(render.canvas);
   canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
+  canvas.width = render.options.width * options.scale;
+  canvas.height = render.options.height * options.scale;
   canvas.style.cssText = `
-  width: 512px;
-  height: 512px;
+  width: ${render.options.width}px;
+  height: ${render.options.height}px;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: -o-crisp-edges;
