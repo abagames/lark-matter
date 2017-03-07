@@ -3,29 +3,43 @@ import * as pag from 'pag';
 import * as ppe from 'ppe';
 import * as sss from 'sss';
 
-let canvas: HTMLCanvasElement;
-let context: CanvasRenderingContext2D;
-let options = {
-  scale: 0.2,
-  rotationNum: 16,
-  enableSes: false,
-  enableBgms: false,
-  seed: null
+let matter: any;
+
+export const LarkMatter = {
+  name: 'lark-matter',
+  version: '0.1.0',
+  for: 'matter-js@^0.12.0',
+  options: {
+    scale: 0.2,
+    rotationNum: 16,
+    enableSes: false,
+    enableBgms: false,
+    seed: null
+  },
+  install: function (base) {
+    matter = base;
+    init();
+  }
 };
 
-export function init() {
-  (<any>Matter).after('Render.create', initRender);
-  (<any>Matter).after('Render.run', runRender);
-  (<any>Matter).after('Engine.create', initEngine);
-  (<any>Matter).after('Body.create', createBody);
+(<any>Matter).Plugin.register(LarkMatter);
+
+let canvas: HTMLCanvasElement;
+let context: CanvasRenderingContext2D;
+
+function init() {
+  matter.after('Render.create', initRender);
+  matter.after('Render.run', runRender);
+  matter.after('Engine.create', initEngine);
+  matter.after('Body.create', createBody);
 }
 
 function initRender() {
   const render: Matter.Render = this;
   render.element.removeChild(render.canvas);
   canvas = document.createElement('canvas');
-  canvas.width = render.options.width * options.scale;
-  canvas.height = render.options.height * options.scale;
+  canvas.width = render.options.width * LarkMatter.options.scale;
+  canvas.height = render.options.height * LarkMatter.options.scale;
   canvas.style.cssText = `
   width: ${render.options.width}px;
   height: ${render.options.height}px;
@@ -39,7 +53,7 @@ function initRender() {
   document.body.appendChild(canvas);
   pag.setDefaultOptions({
     isLimitingColors: true,
-    rotationNum: options.rotationNum,
+    rotationNum: LarkMatter.options.rotationNum,
     colorLighting: 0.5,
     colorNoise: 0.01
   });
@@ -47,15 +61,16 @@ function initRender() {
     canvas: canvas,
     isLimitingColors: true
   });
-  const seed = options.seed != null ? options.seed : Math.random() * 0x7fffffff;
+  const seed = LarkMatter.options.seed != null ?
+    LarkMatter.options.seed : Math.random() * 0x7fffffff;
   pag.setSeed(seed);
   ppe.setSeed(seed);
-  if (options.enableBgms || options.enableSes) {
+  if (LarkMatter.options.enableBgms || LarkMatter.options.enableSes) {
     sss.init();
     sss.setVolume(0.2)
     sss.setQuantize(0.25);
     sss.setSeed(seed);
-    if (options.enableBgms) {
+    if (LarkMatter.options.enableBgms) {
       sss.playBgm('0', 0.25, [sss.Preset.Laser, sss.Preset.Hit], 8, 0.3);
     }
   }
@@ -73,8 +88,8 @@ function createBody() {
   bMaxX = body.position.x + w;
   bMinY = body.position.y - h;
   bMaxY = body.position.y + h;
-  const tw = Math.ceil((bMaxX - bMinX) * options.scale) + 1;
-  const th = Math.ceil((bMaxY - bMinY) * options.scale) + 1;
+  const tw = Math.ceil((bMaxX - bMinX) * LarkMatter.options.scale) + 1;
+  const th = Math.ceil((bMaxY - bMinY) * LarkMatter.options.scale) + 1;
   let lines: { min: number, max: number }[] = nArray(th, null);
   const patterns: string[][] = timesArray(th, () => timesArray(tw, () => ' '));
   for (let k = body.parts.length > 1 ? 1 : 0; k < body.parts.length; k++) {
@@ -88,8 +103,9 @@ function createBody() {
         lines = nArray(th, null);
         return;
       }
-      const v = Matter.Vector.create
-        ((vert.x - bMinX) * options.scale, (vert.y - bMinY) * options.scale);
+      const v = matter.Vector.create(
+        (vert.x - bMinX) * LarkMatter.options.scale,
+        (vert.y - bMinY) * LarkMatter.options.scale);
       if (pv != null) {
         drawLine(lines, tw, th, pv, v);
       } else {
@@ -202,7 +218,7 @@ function fillLines(patterns: string[][], lines: { min: number, max: number }[]) 
 }
 
 function runRender(render: Matter.Render) {
-  Matter.Render.stop(render);
+  matter.Render.stop(render);
   renderLm(render);
 }
 
@@ -211,25 +227,25 @@ function renderLm(render: Matter.Render) {
   context.fillStyle = '#fff';
   context.fillRect(0, 0, canvas.width, canvas.height);
   ppe.update();
-  if (options.enableBgms || options.enableSes) {
+  if (LarkMatter.options.enableBgms || LarkMatter.options.enableSes) {
     sss.update();
   }
-  const bodies = Matter.Composite.allBodies((<any>render).engine.world);
+  const bodies = matter.Composite.allBodies((<any>render).engine.world);
   bodies.forEach(body => {
     if (!body.render.visible) {
       return;
     }
     const angle = body.angle;
     const ri = wrap(
-      Math.round(angle * options.rotationNum / (Math.PI * 2)),
-      0, options.rotationNum);
-    const x = body.position.x * options.scale;
-    const y = body.position.y * options.scale;
-    let o = Matter.Vector.create();
+      Math.round(angle * LarkMatter.options.rotationNum / (Math.PI * 2)),
+      0, LarkMatter.options.rotationNum);
+    const x = body.position.x * LarkMatter.options.scale;
+    const y = body.position.y * LarkMatter.options.scale;
+    let o = matter.Vector.create();
     (<any>body).pixels.forEach(p => {
       o.x = p.x;
       o.y = p.y;
-      o = Matter.Vector.rotate(o, angle);
+      o = matter.Vector.rotate(o, angle);
       pag.draw(context, p.pattern, x + o.x, y + o.y, ri);
     });
   });
@@ -237,21 +253,22 @@ function renderLm(render: Matter.Render) {
 
 function initEngine() {
   const engine: Matter.Engine = this;
-  Matter.Events.on(engine, 'collisionStart', e => {
+  matter.Events.on(engine, 'collisionStart', e => {
     e.pairs.forEach(p => {
       p.activeContacts.forEach(ac => {
         const b = ac.vertex.body;
         const v = b.velocity;
-        let ratio = (<any>p).collision.depth * Matter.Vector.magnitude(v) * 0.1;
+        let ratio = (<any>p).collision.depth * matter.Vector.magnitude(v) * 0.1;
         if (ratio > 2) {
           ratio = 2;
         }
         if (ratio > 0.3) {
           ppe.emit(b.ppeTypeId,
-            ac.vertex.x * options.scale, ac.vertex.y * options.scale,
+            ac.vertex.x * LarkMatter.options.scale,
+            ac.vertex.y * LarkMatter.options.scale,
             Math.atan2(-v.y, -v.x),
             { countScale: ratio, speed: 0.7 * ratio });
-          if (options.enableSes) {
+          if (LarkMatter.options.enableSes) {
             sss.play(b.sssTypeId, 2, null, ratio > 1 ? 1 : ratio);
           }
         }

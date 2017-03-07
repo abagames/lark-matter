@@ -2,11 +2,11 @@ import * as Matter from 'matter-js';
 import * as lm from '../lark-matter/index';
 
 window.onload = () => {
-  lm.init();
-  start();
+  (<any>Matter).use('lark-matter');
+  init();
 }
 
-function start() {
+function init() {
   var engine = Matter.Engine.create(),
     world = engine.world;
   var render = Matter.Render.create({
