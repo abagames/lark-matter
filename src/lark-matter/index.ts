@@ -14,7 +14,8 @@ export const LarkMatter = {
     rotationNum: 16,
     enableSes: false,
     enableBgms: false,
-    seed: null
+    seed: null,
+    onRender: null
   },
   install: function (base) {
     matter = base;
@@ -24,8 +25,8 @@ export const LarkMatter = {
 
 (<any>Matter).Plugin.register(LarkMatter);
 
-let canvas: HTMLCanvasElement;
-let context: CanvasRenderingContext2D;
+export let canvas: HTMLCanvasElement;
+export let context: CanvasRenderingContext2D;
 
 function init() {
   matter.after('Render.create', initRender);
@@ -249,6 +250,9 @@ function renderLm(render: Matter.Render) {
       pag.draw(context, p.pattern, x + o.x, y + o.y, ri);
     });
   });
+  if (LarkMatter.options.onRender != null) {
+    LarkMatter.options.onRender();
+  }
 }
 
 function initEngine() {

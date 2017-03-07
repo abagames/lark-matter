@@ -1,9 +1,16 @@
 import * as Matter from 'matter-js';
 import * as lm from '../lark-matter/index';
+//import * as gcc from 'gcc';
 
 window.onload = () => {
   lm.LarkMatter.options.enableBgms = true;
   lm.LarkMatter.options.enableSes = true;
+  /*lm.LarkMatter.options.onRender = () => {
+    gcc.capture(lm.canvas);
+  };
+  gcc.setOptions({
+    scale: 1
+  });*/
   (<any>Matter).use('lark-matter');
   init();
 }
