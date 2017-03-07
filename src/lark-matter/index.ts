@@ -7,7 +7,10 @@ let canvas: HTMLCanvasElement;
 let context: CanvasRenderingContext2D;
 let options = {
   scale: 0.2,
-  rotationNum: 16
+  rotationNum: 16,
+  enableSes: false,
+  enableBgms: false,
+  seed: null
 };
 
 export function init() {
@@ -44,14 +47,18 @@ function initRender() {
     canvas: canvas,
     isLimitingColors: true
   });
-  sss.init();
-  sss.setVolume(0.2)
-  sss.setQuantize(0.25);
-  const seed = Math.random() * 9999999;
+  const seed = options.seed != null ? options.seed : Math.random() * 0x7fffffff;
   pag.setSeed(seed);
   ppe.setSeed(seed);
-  sss.setSeed(seed);
-  sss.playBgm('0', 0.25, [sss.Preset.Laser, sss.Preset.Hit], 8, 0.3);
+  if (options.enableBgms || options.enableSes) {
+    sss.init();
+    sss.setVolume(0.2)
+    sss.setQuantize(0.25);
+    sss.setSeed(seed);
+    if (options.enableBgms) {
+      sss.playBgm('0', 0.25, [sss.Preset.Laser, sss.Preset.Hit], 8, 0.3);
+    }
+  }
 }
 
 function createBody() {
@@ -204,7 +211,9 @@ function renderLm(render: Matter.Render) {
   context.fillStyle = '#fff';
   context.fillRect(0, 0, canvas.width, canvas.height);
   ppe.update();
-  sss.update();
+  if (options.enableBgms || options.enableSes) {
+    sss.update();
+  }
   const bodies = Matter.Composite.allBodies((<any>render).engine.world);
   bodies.forEach(body => {
     if (!body.render.visible) {
@@ -242,7 +251,9 @@ function initEngine() {
             ac.vertex.x * options.scale, ac.vertex.y * options.scale,
             Math.atan2(-v.y, -v.x),
             { countScale: ratio, speed: 0.7 * ratio });
-          sss.play(b.sssTypeId, 2, null, ratio > 1 ? 1 : ratio);
+          if (options.enableSes) {
+            sss.play(b.sssTypeId, 2, null, ratio > 1 ? 1 : ratio);
+          }
         }
       });
     });
