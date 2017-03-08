@@ -1,5 +1,5 @@
 import * as Matter from 'matter-js';
-import * as lm from '../lark-matter/index';
+import * as LarkMatter from '../lark-matter/index';
 
 window.onload = () => {
   (<any>Matter).use('lark-matter');
