@@ -99,12 +99,6 @@ function createBody() {
     let fv: Matter.Vector;
     let pv: Matter.Vector;
     verticies.forEach((vert: any) => {
-      if (vert.isInternal) {
-        pv = null;
-        fillLines(patterns, lines);
-        lines = nArray(th, null);
-        return;
-      }
       const v = matter.Vector.create(
         (vert.x - bMinX) * LarkMatter.options.scale,
         (vert.y - bMinY) * LarkMatter.options.scale);
