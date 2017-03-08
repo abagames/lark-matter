@@ -1,6 +1,6 @@
 module.exports = {
   entry: {
-    'lark-matter': ['./src/lark-matter/index.ts'],
+    LarkMatter: ['./src/lark-matter/index.ts'],
     wrecking: ['./src/wrecking/index.ts', './src/lark-matter/index.ts'],
     newton: ['./src/newton/index.ts', './src/lark-matter/index.ts']
   },
