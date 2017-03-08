@@ -93,7 +93,7 @@ exports.LarkMatter = {
     version: '0.1.0',
     for: 'matter-js@^0.12.0',
     options: {
-        scale: 0.2,
+        dotSize: 5,
         rotationNum: 16,
         enableSes: false,
         enableBgm: false,
@@ -117,8 +117,8 @@ function initRender() {
     var render = this;
     render.element.removeChild(render.canvas);
     exports.canvas = document.createElement('canvas');
-    exports.canvas.width = render.options.width * exports.LarkMatter.options.scale;
-    exports.canvas.height = render.options.height * exports.LarkMatter.options.scale;
+    exports.canvas.width = render.options.width / exports.LarkMatter.options.dotSize;
+    exports.canvas.height = render.options.height / exports.LarkMatter.options.dotSize;
     exports.canvas.style.cssText = "\n  width: " + render.options.width + "px;\n  height: " + render.options.height + "px;\n  image-rendering: -moz-crisp-edges;\n  image-rendering: -webkit-optimize-contrast;\n  image-rendering: -o-crisp-edges;\n  image-rendering: pixelated;\n  background: white;\n  ";
     exports.context = exports.canvas.getContext('2d');
     document.body.appendChild(exports.canvas);
@@ -158,8 +158,8 @@ function createBody() {
     bMaxX = body.position.x + w;
     bMinY = body.position.y - h;
     bMaxY = body.position.y + h;
-    var tw = Math.ceil((bMaxX - bMinX) * exports.LarkMatter.options.scale) + 1;
-    var th = Math.ceil((bMaxY - bMinY) * exports.LarkMatter.options.scale) + 1;
+    var tw = Math.ceil((bMaxX - bMinX) / exports.LarkMatter.options.dotSize) + 1;
+    var th = Math.ceil((bMaxY - bMinY) / exports.LarkMatter.options.dotSize) + 1;
     var lines = nArray(th, null);
     var patterns = timesArray(th, function () { return timesArray(tw, function () { return ' '; }); });
     var _loop_1 = function (k) {
@@ -167,7 +167,7 @@ function createBody() {
         var fv;
         var pv;
         verticies.forEach(function (vert) {
-            var v = matter.Vector.create((vert.x - bMinX) * exports.LarkMatter.options.scale, (vert.y - bMinY) * exports.LarkMatter.options.scale);
+            var v = matter.Vector.create((vert.x - bMinX) / exports.LarkMatter.options.dotSize, (vert.y - bMinY) / exports.LarkMatter.options.dotSize);
             if (pv != null) {
                 drawLine(lines, tw, th, pv, v);
             }
@@ -297,8 +297,8 @@ function renderLm(render) {
         }
         var angle = body.angle;
         var ri = wrap(Math.round(angle * exports.LarkMatter.options.rotationNum / (Math.PI * 2)), 0, exports.LarkMatter.options.rotationNum);
-        var x = body.position.x * exports.LarkMatter.options.scale;
-        var y = body.position.y * exports.LarkMatter.options.scale;
+        var x = body.position.x / exports.LarkMatter.options.dotSize;
+        var y = body.position.y / exports.LarkMatter.options.dotSize;
         var o = matter.Vector.create();
         body.pixels.forEach(function (p) {
             o.x = p.x;
@@ -323,7 +323,7 @@ function initEngine() {
                     ratio = 2;
                 }
                 if (ratio > 0.3) {
-                    ppe.emit(b.ppeTypeId, ac.vertex.x * exports.LarkMatter.options.scale, ac.vertex.y * exports.LarkMatter.options.scale, Math.atan2(-v.y, -v.x), { countScale: ratio, speed: 0.7 * ratio });
+                    ppe.emit(b.ppeTypeId, ac.vertex.x / exports.LarkMatter.options.dotSize, ac.vertex.y / exports.LarkMatter.options.dotSize, Math.atan2(-v.y, -v.x), { countScale: ratio, speed: 0.7 * ratio });
                     if (exports.LarkMatter.options.enableSes) {
                         sss.play(b.sssTypeId, 2, null, ratio > 1 ? 1 : ratio);
                     }
