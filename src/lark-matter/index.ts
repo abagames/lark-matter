@@ -13,7 +13,7 @@ export const LarkMatter = {
     scale: 0.2,
     rotationNum: 16,
     enableSes: false,
-    enableBgms: false,
+    enableBgm: false,
     seed: null,
     onRender: null
   },
@@ -22,6 +22,7 @@ export const LarkMatter = {
     init();
   }
 };
+export const options = LarkMatter.options;
 
 (<any>Matter).Plugin.register(LarkMatter);
 
@@ -66,12 +67,12 @@ function initRender() {
     LarkMatter.options.seed : Math.random() * 0x7fffffff;
   pag.setSeed(seed);
   ppe.setSeed(seed);
-  if (LarkMatter.options.enableBgms || LarkMatter.options.enableSes) {
+  if (LarkMatter.options.enableBgm || LarkMatter.options.enableSes) {
     sss.init();
     sss.setVolume(0.2)
     sss.setQuantize(0.25);
     sss.setSeed(seed);
-    if (LarkMatter.options.enableBgms) {
+    if (LarkMatter.options.enableBgm) {
       sss.playBgm('0', 0.25, [sss.Preset.Laser, sss.Preset.Hit], 8, 0.3);
     }
   }
@@ -228,7 +229,7 @@ function renderLm(render: Matter.Render) {
   context.fillStyle = '#fff';
   context.fillRect(0, 0, canvas.width, canvas.height);
   ppe.update();
-  if (LarkMatter.options.enableBgms || LarkMatter.options.enableSes) {
+  if (LarkMatter.options.enableBgm || LarkMatter.options.enableSes) {
     sss.update();
   }
   const bodies = matter.Composite.allBodies((<any>render).engine.world);

@@ -3,7 +3,7 @@ import * as lm from '../lark-matter/index';
 //import * as gcc from 'gcc';
 
 window.onload = () => {
-  lm.LarkMatter.options.enableBgms = true;
+  lm.LarkMatter.options.enableBgm = true;
   lm.LarkMatter.options.enableSes = true;
   /*lm.LarkMatter.options.onRender = () => {
     gcc.capture(lm.canvas);
