@@ -14,7 +14,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
     modules: ['node_modules', 'web_modules']
   },
-  devtool: 'source-map',
+  //devtool: 'source-map',
   devServer: {
     contentBase: 'docs'
   },
