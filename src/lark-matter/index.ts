@@ -10,7 +10,7 @@ export const LarkMatter = {
   version: '0.1.0',
   for: 'matter-js@^0.12.0',
   options: {
-    scale: 0.2,
+    dotSize: 5,
     rotationNum: 16,
     enableSes: false,
     enableBgm: false,
@@ -40,8 +40,8 @@ function initRender() {
   const render: Matter.Render = this;
   render.element.removeChild(render.canvas);
   canvas = document.createElement('canvas');
-  canvas.width = render.options.width * LarkMatter.options.scale;
-  canvas.height = render.options.height * LarkMatter.options.scale;
+  canvas.width = render.options.width / LarkMatter.options.dotSize;
+  canvas.height = render.options.height / LarkMatter.options.dotSize;
   canvas.style.cssText = `
   width: ${render.options.width}px;
   height: ${render.options.height}px;
@@ -90,8 +90,8 @@ function createBody() {
   bMaxX = body.position.x + w;
   bMinY = body.position.y - h;
   bMaxY = body.position.y + h;
-  const tw = Math.ceil((bMaxX - bMinX) * LarkMatter.options.scale) + 1;
-  const th = Math.ceil((bMaxY - bMinY) * LarkMatter.options.scale) + 1;
+  const tw = Math.ceil((bMaxX - bMinX) / LarkMatter.options.dotSize) + 1;
+  const th = Math.ceil((bMaxY - bMinY) / LarkMatter.options.dotSize) + 1;
   let lines: { min: number, max: number }[] = nArray(th, null);
   const patterns: string[][] = timesArray(th, () => timesArray(tw, () => ' '));
   for (let k = body.parts.length > 1 ? 1 : 0; k < body.parts.length; k++) {
@@ -100,8 +100,8 @@ function createBody() {
     let pv: Matter.Vector;
     verticies.forEach((vert: any) => {
       const v = matter.Vector.create(
-        (vert.x - bMinX) * LarkMatter.options.scale,
-        (vert.y - bMinY) * LarkMatter.options.scale);
+        (vert.x - bMinX) / LarkMatter.options.dotSize,
+        (vert.y - bMinY) / LarkMatter.options.dotSize);
       if (pv != null) {
         drawLine(lines, tw, th, pv, v);
       } else {
@@ -235,8 +235,8 @@ function renderLm(render: Matter.Render) {
     const ri = wrap(
       Math.round(angle * LarkMatter.options.rotationNum / (Math.PI * 2)),
       0, LarkMatter.options.rotationNum);
-    const x = body.position.x * LarkMatter.options.scale;
-    const y = body.position.y * LarkMatter.options.scale;
+    const x = body.position.x / LarkMatter.options.dotSize;
+    const y = body.position.y / LarkMatter.options.dotSize;
     let o = matter.Vector.create();
     (<any>body).pixels.forEach(p => {
       o.x = p.x;
@@ -263,8 +263,8 @@ function initEngine() {
         }
         if (ratio > 0.3) {
           ppe.emit(b.ppeTypeId,
-            ac.vertex.x * LarkMatter.options.scale,
-            ac.vertex.y * LarkMatter.options.scale,
+            ac.vertex.x / LarkMatter.options.dotSize,
+            ac.vertex.y / LarkMatter.options.dotSize,
             Math.atan2(-v.y, -v.x),
             { countScale: ratio, speed: 0.7 * ratio });
           if (LarkMatter.options.enableSes) {
