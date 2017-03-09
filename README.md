@@ -2,8 +2,6 @@ lark-matter
 ======================
 Pixel art style [matter.js](http://brm.io/matter-js/) renderer plugin.
 
-![screenshot](https://abagames.github.io/lark-matter/screenshot.gif)
-
 ### Demos
 
 [wrecking](https://abagames.github.io/lark-matter/wrecking/index.html)
